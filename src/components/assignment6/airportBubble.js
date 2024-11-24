@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { groupByCity } from "./utils";
-import { forceSimulation, forceX, forceY, forceCollide, scaleLinear, min, max } from "d3";
+import { select, forceSimulation, forceX, forceY, forceCollide, scaleLinear, min, max } from "d3";
 
 
 function AirportBubble(props){
     const {width, height, countries, routes, selectedAirline} = props;
-    // console.log(groupByCity(routes));
-    if(selectedAirline){
-        let selectedRoutes = routes.filter(a => a.AirlineID === selectedAirline);
-        let cities;
-        let raidus;
+    console.log(groupByCity(routes));
+    //if(selectedAirline){
+        //let selectedRoutes = routes.filter(a => a.AirlineID === selectedAirline);
+        //let cities;
+        //let raidus;
         //TODO: when the selectedAirline is not null,
         //1.Obtain an array of cities from the selectedRoutes by groupByCity
         //2.Sort the cities ascendingly by the d.Count (i.e., the number of routes from/to the city)
@@ -34,18 +34,66 @@ function AirportBubble(props){
         //     fill:"#992a2a", fontSize:16, fontFamily:"cursive", 
         //     paintOrder:"stroke", strokeLinejoin:"round"}}
         //Note: for each <circle />, please set the key={idx} to avoid the warnings.
-        return <g>
-            
-        </g>
-    } else {
-        //TODO: when the selectedAirline is null,
-        //1.Obtain an array of cities from the routes by groupByCity;
-        //2.Plot the bubble chart; highlight the top 5 hub cities worldwide,
-        //  using the same settings as the case when the selectedAirline is not null;
-        return <g>
+        const svgRef = useRef();
 
-        </g>
-    }
+    useEffect(() => {
+        const svg = select(svgRef.current);
+        svg.selectAll("*").remove();
+
+        let data = groupByCity(routes);
+
+        if (selectedAirline) {
+            data = groupByCity(routes.filter(route => route.AirlineID === selectedAirline));
+        }
+
+        data.sort((a, b) => a.Count - b.Count); // 升序排序确保大气泡在上层
+
+        const radiusScale = scaleLinear()
+            .domain([min(data, d => d.Count), max(data, d => d.Count)])
+            .range([2, width * 0.15]);
+
+        const simulation = forceSimulation(data)
+            .force("x", forceX(width / 2).strength(0.05))
+            .force("y", forceY(height / 2).strength(0.05))
+            .force("collide", forceCollide(d => radiusScale(d.Count) + 1))
+            .stop();
+
+        for (let i = 0; i < 200; i++) {
+            simulation.tick();
+        }
+
+        svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y)
+            .attr("r", d => radiusScale(d.Count))
+            .attr("fill", (d, idx) => idx >= data.length - 5 ? "#ADD8E6" : "#2a5599")
+            .attr("stroke", "black")
+            .attr("stroke-width", "2");
+
+        svg.selectAll("text")
+            .data(data.slice(-5))
+            .enter()
+            .append("text")
+            .attr("x", d => d.x)
+            .attr("y", d => d.y)
+            .style("text-anchor", "middle")
+            .style("stroke", "pink")
+            .style("stroke-width", "0.5em")
+            .style("fill", "#992a2a")
+            .style("font-size", "16px")
+            .style("font-family", "cursive")
+            .style("paint-order", "stroke")
+            .style("stroke-linejoin", "round")
+            .text(d => d.City);
+
+    }, [width, height, routes, selectedAirline]); // 依赖列表
+
+    return (
+        <svg ref={svgRef} width={width} height={height}></svg>
+    );
 }
 
 export { AirportBubble }

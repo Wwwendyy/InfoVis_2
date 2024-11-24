@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.css'
 import { csv, json } from "d3";
 import { Row, Col, Container } from "react-bootstrap";
 import { groupByAirline, groupByAirport } from "../components/assignment6/utils";
-import styles from "../styles/assignment5_styles.module.css";
+import styles from "../styles/assignment6_styles.module.css";
 import { AirportMap }  from "../components/assignment6/airportMap";
 import { BarChart } from "../components/assignment6/barChart";
 import { AirportBubble} from "../components/assignment6/airportBubble";

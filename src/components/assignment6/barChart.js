@@ -9,8 +9,8 @@ export function BarChart (props) {
     const xScale = scaleLinear().range([0, width]).domain([0, maximunCount]).nice();
     const yScale = scaleBand().range([0, height]).domain(data.map(a => a.AirlineName)).padding(0.2) //The domain is the list of ailines names
     let color = (d) => d.AirlineID===selectedAirline? "#992a5b":"#2a5599";
-    let onMouseOver = (d) => setSelectedAirline(d.AirlineID);
-    let onMouseOut = () => setSelectedAirline('null');
+    //let onMouseOver = (d) => setSelectedAirline(d.AirlineID);
+    //let onMouseOut = () => setSelectedAirline('null');
     //TODO:
     //1.Change the mouse event in <rect/> to onClick;
     //2.Remove the onMouseOut in <rect />;
@@ -22,12 +22,20 @@ export function BarChart (props) {
     //  Hint: You can compare the selectedAirline to d.AirlineID if they are the same,
     //  call setSelectedAirline(null);
     //4.Remove the onMouseOver and onMouseOut;
-    
+    const onClick = (d) => {
+        // Toggle the selected airline: if clicked airline is already selected, deselect it
+        if (selectedAirline === d.AirlineID) {
+            setSelectedAirline(null); // Deselect the airline
+        } else {
+            setSelectedAirline(d.AirlineID); // Select the airline
+        }
+    };
     return <g transform={`translate(${offsetX}, ${offsetY})`}>
         { data.map( d => {
             return <rect key={d.AirlineID} x={0} y={yScale(d.AirlineName)}
                 width={xScale(d.Count)} height={yScale.bandwidth()} 
-                onMouseOver={()=>onMouseOver(d)} onMouseOut={onMouseOut}
+                //onMouseOver={()=>onMouseOver(d)} onMouseOut={onMouseOut}
+                onClick={() => onClick(d)}
                 stroke="black" fill={color(d)}/>
         }) }
         <YAxis yScale={yScale} height={height} offsetX={offsetX}/>

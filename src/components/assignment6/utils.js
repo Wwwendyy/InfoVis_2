@@ -60,6 +60,40 @@ function groupByCity(data) {
     //  it returns an array of objects; the Count of each object represents the number
     //  of routes related to the city.
     //Hint: you need to use d.DestCity and d.SourceCity;
+    let result = data.reduce((result, d) => {
+        // Update count for the destination city
+        let currentDest = result[d.DestCity] || {
+            "Airport": d.DestAirport,
+            "AirportID": d.DestAirportID,
+            "City": d.DestCity,
+            "Country": d.DestCountry,
+            "Latitude": +d.DestLatitude,
+            "Longitude": +d.DestLongitude,
+            "Count": 0
+        };
+        currentDest.Count += 1;
+        result[d.DestCity] = currentDest;
+
+        // Update count for the source city
+        let currentSource = result[d.SourceCity] || {
+            "Airport": d.SourceAirport,
+            "AirportID": d.SourceAirportID,
+            "City": d.SourceCity,
+            "Country": d.SourceCountry,
+            "Latitude": +d.SourceLatitude,
+            "Longitude": +d.SourceLongitude,
+            "Count": 0
+        };
+        currentSource.Count += 1;
+        result[d.SourceCity] = currentSource;
+
+        return result;
+    }, {});
+    //let finalResult = Object.values(result);
+    //finalResult = finalResult.sort((a, b) => b.Count - a.Count);
+    result = Object.keys(result).map(key => result[key])
+    //return finalResult;
+    return result
 }
 
 export {
